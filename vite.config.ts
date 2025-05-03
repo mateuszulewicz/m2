@@ -94,11 +94,39 @@ export default defineConfig((config) => {
     build: {
       target: 'esnext',
     },
-    // Dodana sekcja server z allowedHosts
+    // Rozszerzona sekcja server z więcej opcjami
     server: {
       allowedHosts: [
         'localhost',
-        'bolt-boltdiy.gt8kau.easypanel.host'
+        'bolt-boltdiy.gt8kau.easypanel.host',
+        '*.gt8kau.easypanel.host',
+        'gt8kau.easypanel.host'
+      ],
+      host: '0.0.0.0',
+      cors: true,
+      strictPort: false,
+      hmr: {
+        clientPort: 443
+      },
+      watch: {
+        usePolling: true
+      },
+      proxy: {
+        '/_vite': {
+          target: 'http://localhost:5173',
+          changeOrigin: true,
+          secure: false
+        }
+      }
+    },
+    preview: {
+      port: 5173,
+      host: '0.0.0.0',
+      allowedHosts: [
+        'localhost',
+        'bolt-boltdiy.gt8kau.easypanel.host',
+        '*.gt8kau.easypanel.host',
+        'gt8kau.easypanel.host'
       ]
     },
     plugins: [
@@ -124,6 +152,23 @@ export default defineConfig((config) => {
 
           return null;
         },
+      },
+      // Dodanie pluginu dla CORS
+      {
+        name: 'allow-all-hosts',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            if (req.method === 'OPTIONS') {
+              res.statusCode = 200;
+              res.end();
+              return;
+            }
+            next();
+          });
+        }
       },
       config.mode !== 'test' && remixCloudflareDevProxy(),
       remixVitePlugin({
