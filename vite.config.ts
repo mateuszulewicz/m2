@@ -94,6 +94,13 @@ export default defineConfig((config) => {
     build: {
       target: 'esnext',
     },
+    // Dodana sekcja server z allowedHosts
+    server: {
+      allowedHosts: [
+        'localhost',
+        'bolt-boltdiy.gt8kau.easypanel.host'
+      ]
+    },
     plugins: [
       nodePolyfills({
         include: ['buffer', 'process', 'util', 'stream'],
