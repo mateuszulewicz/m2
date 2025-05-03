@@ -13,6 +13,10 @@ services:
       - COMPOSE_PROFILES=production
       # No strictly needed but serving as hints for Coolify
       - PORT=5173
+      - HOST=0.0.0.0
+      - VITE_BASE_URL=https://bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST=bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST2=*.gt8kau.easypanel.host
       - GROQ_API_KEY=${GROQ_API_KEY}
       - HuggingFace_API_KEY=${HuggingFace_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -32,7 +36,22 @@ services:
     command: pnpm run dockerstart
     profiles:
       - production
-
+    # Dodane opcje dla lepszej obsługi w kontenerze
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    # Zwiększenie limitów pamięci
+    deploy:
+      resources:
+        limits:
+          memory: 24G
+        reservations:
+          memory: 16G
+          
   app-dev:
     image: bolt-ai:development
     build:
@@ -46,6 +65,12 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - PORT=5173
+      - HOST=0.0.0.0
+      # Dodane zmienne dla Vite i dozwolonych hostów
+      - VITE_BASE_URL=https://bolt-boltdiy.gt8kau.easypanel.host
+      - VITE_ALLOWED_HOST=bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST=bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST2=*.gt8kau.easypanel.host
       - GROQ_API_KEY=${GROQ_API_KEY}
       - HuggingFace_API_KEY=${HuggingFace_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -72,7 +97,14 @@ services:
       - '5173:5173'
     command: pnpm run dev --host 0.0.0.0
     profiles: ['development', 'default']
-
+    # Zwiększenie limitów pamięci
+    deploy:
+      resources:
+        limits:
+          memory: 24G
+        reservations:
+          memory: 16G
+          
   app-prebuild:
     image: ghcr.io/stackblitz-labs/bolt.diy:latest
     ports:
@@ -82,6 +114,10 @@ services:
       - COMPOSE_PROFILES=production
       # No strictly needed but serving as hints for Coolify
       - PORT=5173
+      - HOST=0.0.0.0
+      - VITE_BASE_URL=https://bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST=bolt-boltdiy.gt8kau.easypanel.host
+      - REMIX_ALLOWED_HOST2=*.gt8kau.easypanel.host
       - OLLAMA_API_BASE_URL=http://127.0.0.1:11434
       - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
@@ -90,3 +126,10 @@ services:
     command: pnpm run dockerstart
     profiles:
       - prebuilt
+    # Zwiększenie limitów pamięci
+    deploy:
+      resources:
+        limits:
+          memory: 24G
+        reservations:
+          memory: 16G
